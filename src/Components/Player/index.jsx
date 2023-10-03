@@ -70,6 +70,7 @@ const Player = ({ position = [0, 0, 0] }) => {
   const orbitControl = useRef();
   const playerRBodyRef = useRef(null);
   const playerRef = useRef(null);
+  const playerColliderRef = useRef(null);
   const [playerPosition] = useState({
     x: position[0],
     y: position[1],
@@ -82,18 +83,15 @@ const Player = ({ position = [0, 0, 0] }) => {
   const wolfAnimations = [animations[2], animations[3]];
   const workingAnimations = useAnimations(wolfAnimations, scene);
 
-  // camera state
-  const { camera } = useThree();
-
   //used for lerping
-  const [cameraSpeed, setCameraSpeed] = useState(1);
+  const [cameraSpeed, setCameraSpeed] = useState(4);
   const [smoothedCameraPosition] = useState(
     () => new THREE.Vector3(20, 10, 10)
   );
   const [smoothedCameraTarget] = useState(() => new THREE.Vector3());
 
   // Handle camera and body rotation (initially have a 45 degree angle)
-  const [rotationAngle, setRotationAngle] = useState(Math.PI / 4);
+  const [rotationAngle] = useState({ angle: Math.PI / 4 });
   const cameraDistance = 5;
 
   /**
@@ -127,23 +125,29 @@ const Player = ({ position = [0, 0, 0] }) => {
   }, [playerAnimation]);
 
   useFrame((state, delta) => {
-    if (!(playerRef?.current && playerRBodyRef?.current)) return;
+    if (
+      !(
+        playerRef?.current &&
+        playerRBodyRef?.current &&
+        playerColliderRef?.current
+      )
+    )
+      return;
     const camera = state.camera;
-    const time = state.clock.getElapsedTime();
     const { forward, backward, leftward, rightward, shift } = getKeys();
 
     /**
      * Speed
      */
     // Adjust the speed based on whether shift is pressed or not
-    const speed = shift ? 9.5 : 7;
+    const speed = shift ? 10 : 7;
     const impulse = { x: 0, y: 0, z: 0 };
 
     // Movement Direction represents the direction in which the player should move forward or backward based on the camera's rotation
     const movementDirection = new THREE.Vector3(
-      Math.sin(rotationAngle),
+      Math.sin(rotationAngle.angle),
       0,
-      Math.cos(rotationAngle)
+      Math.cos(rotationAngle.angle)
     );
 
     if (forward && backward) {
@@ -170,7 +174,6 @@ const Player = ({ position = [0, 0, 0] }) => {
         playerRBodyRef.current.translation(),
         (7 * Math.PI) / 4
       );
-      console.log(impulse, targetRotation);
 
       // Interpolate current with target
       const smoothedRotation = smoothRotation(
@@ -259,7 +262,7 @@ const Player = ({ position = [0, 0, 0] }) => {
       setPlayerAnimation(RUNNING);
 
       // Apply left camera rotation using cameraTurnSpeed [+ for left]
-      setRotationAngle(rotationAngle + cameraTurnSpeed);
+      rotationAngle.angle = rotationAngle.angle + cameraTurnSpeed;
 
       // Update cameraSpeed on move.
       setCameraSpeed(10);
@@ -291,7 +294,7 @@ const Player = ({ position = [0, 0, 0] }) => {
       setPlayerAnimation(RUNNING);
 
       // Apply right camera rotation using cameraTurnSpeed [- for right]
-      setRotationAngle(rotationAngle - cameraTurnSpeed);
+      rotationAngle.angle = rotationAngle.angle - cameraTurnSpeed;
 
       // Update cameraSpeed on move.
       setCameraSpeed(10);
@@ -315,7 +318,6 @@ const Player = ({ position = [0, 0, 0] }) => {
         delta
       );
 
-      // Keep the rotation within the range of 0 and 2π
       playerRef.current.rotation.y =
         (2 * Math.PI + smoothedRotation) % (2 * Math.PI);
 
@@ -323,7 +325,7 @@ const Player = ({ position = [0, 0, 0] }) => {
       setPlayerAnimation(RUNNING);
 
       // Apply left camera rotation using cameraTurnSpeed [+ for left]
-      setRotationAngle(rotationAngle + cameraTurnSpeed);
+      rotationAngle.angle = rotationAngle.angle + cameraTurnSpeed;
 
       // Update cameraSpeed on move.
       setCameraSpeed(10);
@@ -355,7 +357,7 @@ const Player = ({ position = [0, 0, 0] }) => {
       setPlayerAnimation(RUNNING);
 
       // Apply right camera rotation using cameraTurnSpeed [- for right]
-      setRotationAngle(rotationAngle - cameraTurnSpeed);
+      rotationAngle.angle = rotationAngle.angle - cameraTurnSpeed;
 
       // Update cameraSpeed on move.
       setCameraSpeed(10);
@@ -387,7 +389,7 @@ const Player = ({ position = [0, 0, 0] }) => {
       setPlayerAnimation(RUNNING);
 
       // Apply left camera rotation using cameraTurnSpeed [+ for left]
-      setRotationAngle(rotationAngle + cameraTurnSpeed);
+      rotationAngle.angle = rotationAngle.angle + cameraTurnSpeed;
 
       // Update cameraSpeed on move.
       setCameraSpeed(10);
@@ -419,7 +421,7 @@ const Player = ({ position = [0, 0, 0] }) => {
       setPlayerAnimation(RUNNING);
 
       // Apply right camera rotation using cameraTurnSpeed [- for right]
-      setRotationAngle(rotationAngle - cameraTurnSpeed);
+      rotationAngle.angle = rotationAngle.angle - cameraTurnSpeed;
 
       // Update cameraSpeed on move.
       setCameraSpeed(10);
@@ -439,8 +441,8 @@ const Player = ({ position = [0, 0, 0] }) => {
     if (true) {
       // Update camera
       const cameraRotation = THREE.MathUtils.lerp(
-        rotationAngle,
-        rotationAngle,
+        rotationAngle.angle,
+        rotationAngle.angle,
         10 * delta
       );
 
@@ -464,32 +466,28 @@ const Player = ({ position = [0, 0, 0] }) => {
       state.camera.position.copy(smoothedCameraPosition);
       state.camera.lookAt(smoothedCameraTarget);
     }
-
-    // if (forward || backward || leftward || rightward) {
-    //   setPlayerAnimation(RUNNING);
-    //   if (playerRef?.current) {
-    //     // movePlayer();
-    //   }
-    // } else {
-    //   setPlayerAnimation(RESTING);
-    // }
   });
 
   return (
     <>
-      <OrbitControls ref={orbitControl} makeDefault />
+      {/* <OrbitControls ref={orbitControl} makeDefault /> */}
       <group position={position}>
         <RigidBody
           ref={playerRBodyRef}
           colliders={false}
           //   scale={0.5}
           rotation-y={Math.PI * 1.25}
-          friction={1.25}
+          friction={1.5}
           linearDamping={1.25}
           angularDamping={1.25}
           enabledRotations={[false, false, false]}
+          canSleep={false}
         >
-          <CuboidCollider args={[0.17, 0.4, 0.6]} position={[0, 0.4, 0]} />
+          <CuboidCollider
+            ref={playerColliderRef}
+            args={[0.17, 0.4, 0.6]}
+            position={[0, 0.4, 0]}
+          />
           <primitive ref={playerRef} object={scene} castshadow flatShading />
         </RigidBody>
       </group>

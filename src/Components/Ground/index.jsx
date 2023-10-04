@@ -17,7 +17,27 @@ const Ground = ({ position = [0, 0, 0], scale = GROUND_SCALE }) => {
           castShadow
           userData={{ camExcludeCollision: true }}
         ></mesh>
-        <mesh scale={0.5} position={[3, 1, 3]} castShadow>
+        <mesh scale={[0.5, 0.05, 0.5]} position={[2, 0.025, 3]} castShadow>
+          <boxGeometry />
+          <meshStandardMaterial color="red" />
+        </mesh>
+        <mesh scale={[0.5, 0.05, 0.5]} position={[3, 0.025, 3]} castShadow>
+          <boxGeometry />
+          <meshStandardMaterial color="red" />
+        </mesh>
+        <mesh scale={[0.5, 0.05, 0.5]} position={[4, 0.025, 3]} castShadow>
+          <boxGeometry />
+          <meshStandardMaterial color="red" />
+        </mesh>
+        <mesh scale={[0.5, 0.05, 0.5]} position={[2, 0.025, 4]} castShadow>
+          <boxGeometry />
+          <meshStandardMaterial color="red" />
+        </mesh>
+        <mesh scale={[0.5, 0.05, 0.5]} position={[3, 0.025, 4]} castShadow>
+          <boxGeometry />
+          <meshStandardMaterial color="red" />
+        </mesh>
+        <mesh scale={[0.5, 0.05, 0.5]} position={[4, 0.025, 4]} castShadow>
           <boxGeometry />
           <meshStandardMaterial color="red" />
         </mesh>

@@ -6,7 +6,12 @@ import {
   useKeyboardControls,
 } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { CuboidCollider, RigidBody, useRapier } from "@react-three/rapier";
+import {
+  BallCollider,
+  CuboidCollider,
+  RigidBody,
+  useRapier,
+} from "@react-three/rapier";
 import { useEffect, useRef, useState } from "react";
 import { RESTING, RUNNING } from "../../Constants/animtions";
 
@@ -70,7 +75,6 @@ const Player = ({ position = [0, 0, 0] }) => {
   const orbitControl = useRef();
   const playerRBodyRef = useRef(null);
   const playerRef = useRef(null);
-  const playerColliderRef = useRef(null);
   const [playerPosition] = useState({
     x: position[0],
     y: position[1],
@@ -125,14 +129,7 @@ const Player = ({ position = [0, 0, 0] }) => {
   }, [playerAnimation]);
 
   useFrame((state, delta) => {
-    if (
-      !(
-        playerRef?.current &&
-        playerRBodyRef?.current &&
-        playerColliderRef?.current
-      )
-    )
-      return;
+    if (!(playerRef?.current && playerRBodyRef?.current)) return;
     const camera = state.camera;
     const { forward, backward, leftward, rightward, shift } = getKeys();
 
@@ -140,7 +137,7 @@ const Player = ({ position = [0, 0, 0] }) => {
      * Speed
      */
     // Adjust the speed based on whether shift is pressed or not
-    const speed = shift ? 10 : 7;
+    const speed = shift ? 8 : 5;
     const impulse = { x: 0, y: 0, z: 0 };
 
     // Movement Direction represents the direction in which the player should move forward or backward based on the camera's rotation
@@ -431,6 +428,7 @@ const Player = ({ position = [0, 0, 0] }) => {
 
     // Apply impulse on playerRef
     playerRBodyRef.current.applyImpulse(impulse);
+    playerRBodyRef.current.applyTorqueImpulse(impulse);
 
     // Body position for both Camera and phases
     const bodyPosition = playerRBodyRef.current.translation();
@@ -483,12 +481,9 @@ const Player = ({ position = [0, 0, 0] }) => {
           enabledRotations={[false, false, false]}
           canSleep={false}
         >
-          <CuboidCollider
-            ref={playerColliderRef}
-            args={[0.17, 0.4, 0.6]}
-            position={[0, 0.4, 0]}
-          />
           <primitive ref={playerRef} object={scene} castshadow flatShading />
+          <BallCollider args={[0.4]} position={[0, 0.4, 0]} />
+          {/* <CuboidCollider args={[0.3, 0.3, 0.3]} position={[0, 0.4, 0]} /> */}
         </RigidBody>
       </group>
     </>

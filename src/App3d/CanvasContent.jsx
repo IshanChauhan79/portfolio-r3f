@@ -1,5 +1,5 @@
 import { OrbitControls, PointerLockControls, Sky } from "@react-three/drei";
-import { Physics } from "@react-three/rapier";
+import { Physics, RigidBody } from "@react-three/rapier";
 import { Perf } from "r3f-perf";
 import Lights from "../Utility/Lights";
 import Ground from "../Components/Ground";
@@ -17,10 +17,22 @@ const CanvasContent = () => {
 
       {/* lights for the scene */}
       <Lights />
+      <OrbitControls />
 
       <Physics debug>
         <Ground />
-        <Player position={[0, 0, 4]} />
+        {/* <Player position={[0, 0, 4]} /> */}
+        {/* <RigidBody
+          type="fixed"
+          scale={10}
+          position={[-5, -3.5, -5]}
+          rotation-x={Math.PI * 1.1}
+        >
+          <mesh>
+            <boxGeometry></boxGeometry>
+            <meshStandardMaterial color="red" />
+          </mesh>
+        </RigidBody> */}
       </Physics>
 
       {/* <PointerLockControls makeDefault /> */}
